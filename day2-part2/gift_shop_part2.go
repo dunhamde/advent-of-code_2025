@@ -92,7 +92,7 @@ func getNextRepeat(x int, numDigits int) int {
 }
 
 func main() {
-	file, err := os.Open("product_id_ranges")
+	file, err := os.Open("../input-data/product_id_ranges")
 	if err != nil {
 		log.Fatalf("Error opening file: %v", err)
 	}
