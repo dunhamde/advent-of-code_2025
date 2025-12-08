@@ -18,18 +18,8 @@ func isInBounds(paperMat [][]bool, x int, y int) bool {
 	return true
 }
 
-// x-1, y
-// x-1, y-1
-// x, y-1
-// x+1, y+1
-// x+1, y
-// x+1, y-1
-// x, y+1
-// x-1, y+1
-
 func checkCell(paperMat [][]bool, x int, y int) bool {
 	numRolls := 0
-	fmt.Printf("%d, %d \n", x, y)
 	if isInBounds(paperMat, x-1, y) && paperMat[x-1][y] {
 		numRolls++
 	}
@@ -54,12 +44,11 @@ func checkCell(paperMat [][]bool, x int, y int) bool {
 	if isInBounds(paperMat, x-1, y+1) && paperMat[x-1][y+1] {
 		numRolls++
 	}
-	// fmt.Println(numRolls < 4)
 	return numRolls < 4
 }
 
 func main() {
-	file, err := os.Open("paper")
+	file, err := os.Open("../day4/paper")
 	if err != nil {
 		log.Fatalf("Error opening file: %v", err)
 	}
@@ -68,7 +57,7 @@ func main() {
 			log.Fatalf("Error closing file: %v", err)
 		}
 	}()
-	totalRolls := 0
+	removedRolls := 0
 	paperMat := [][]bool{}
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
@@ -84,28 +73,22 @@ func main() {
 		paperMat = append(paperMat, paperLineArr)
 	}
 
-	fmt.Println(paperMat[0])
-	// fmt.Println("mat len: ", len(paperMat))
-	for x, rollRow := range paperMat {
-		for y, _ := range rollRow {
-			// fmt.Println("row len: ", len(rollRow))
-			// fmt.Println("roll valyue: ", paperMat[x][y])
-			if paperMat[x][y] && checkCell(paperMat, x, y) {
-				totalRolls++
+	removedRollsIter := 0
+	for {
+		for x, rollRow := range paperMat {
+			for y, _ := range rollRow {
+				if paperMat[x][y] && checkCell(paperMat, x, y) {
+					paperMat[x][y] = false
+					removedRollsIter++
+				}
 			}
 		}
+		if removedRollsIter == 0 {
+			break
+		} else {
+			removedRolls += removedRollsIter
+		}
+		removedRollsIter = 0
 	}
-	fmt.Println(totalRolls)
+	fmt.Println(removedRolls)
 }
-
-// nested for loops through the whole matrix
-// on each iteration check the cells surrounding 8 cells
-
-// x-1, y
-// x-1, y-1
-// x, y-1
-// x+1, y+1
-// x+1, y
-// x+1, y-1
-// x, y+1
-// x-1, y+1
