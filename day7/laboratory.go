@@ -35,6 +35,29 @@ func processLine(line string, beamCols *map[int]bool, totalSplits *int) {
 
 }
 
+func sumTimelines(currentCol int, lines []string) int {
+	// base case: if we reach the bottom of the diagram
+	if len(lines) == 0 {
+		return 1
+	}
+	// find next splitter in the current column
+	for rowIdx, line := range lines {
+		char := line[currentCol]
+		if char == '^' {
+			// splitter found, recursively take both outgoing beams
+			leftTimelines := sumTimelines(currentCol-1, lines[rowIdx+1:])
+			rightTimelines := sumTimelines(currentCol+1, lines[rowIdx+1:])
+			return leftTimelines + rightTimelines
+		}
+	}
+	// no splitter found in this column, beam reaches bottom
+	return 1
+}
+func doPartTwo(initialCol int, lines []string) {
+	totalTimelines := sumTimelines(initialCol, lines)
+	fmt.Printf("Total timelines reaching bottom: %d\n", totalTimelines)
+}
+
 func main() {
 	file, err := os.Open("diagram")
 	if err != nil {
@@ -48,9 +71,11 @@ func main() {
 	scanner := bufio.NewScanner(file)
 	totalSplits := 0
 	initialCol := -1
+	lines := []string{}
 	beamCols := make(map[int]bool)
 	for scanner.Scan() {
 		line := scanner.Text()
+		lines = append(lines, line)
 		fmt.Println(line)
 		if initialCol == -1 {
 			initialCol = findInitialBeamCol(line)
@@ -61,16 +86,19 @@ func main() {
 		}
 
 	}
+
 	fmt.Printf("Total beam splits: %d\n", totalSplits)
 	fmt.Println("-----")
 	fmt.Println("beamCols:", beamCols)
+	doPartTwo(initialCol, lines[1:]) // pass lines excluding the first line with 'S'
 
-	// doPartOne(file)
-	// doPartTwo(file)
 }
 
 // part one:
 // compute total number of times the beam splits in the laboratory diagram
 
 // part two:
-//
+// use recursion to take a beam until it reaches the next splitter or bottom
+// when the beam reaches a splitter, recursively take the two outgoing beams
+// when a beam reaches the bottom, return 1
+// sum up all the returns from the bottom to get total splits
