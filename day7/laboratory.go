@@ -35,28 +35,52 @@ func processLine(line string, beamCols *map[int]bool, totalSplits *int) {
 
 }
 
-func sumTimelines(currentCol int, lines []string) int {
-	// base case: if we reach the bottom of the diagram
-	if len(lines) == 0 {
-		return 1
-	}
+func memoizationKey(col int, row int) string {
+	return fmt.Sprintf("%d,%d", col, row)
+}
+
+func getMemoizedValue(col int, row int) (int, bool) {
+	key := memoizationKey(col, row)
+	value, exists := memoizationCache[key]
+	return value, exists
+}
+
+func setMemoizedValue(col int, row int, value int) {
+	key := memoizationKey(col, row)
+	memoizationCache[key] = value
+}
+
+func sumTimelines(currentCol int, lines []string, currentRowIdx int) int {
 	// find next splitter in the current column
+	splitterIdx := -1
 	for rowIdx, line := range lines {
 		char := line[currentCol]
+
 		if char == '^' {
+			splitterIdx = rowIdx
 			// splitter found, recursively take both outgoing beams
-			leftTimelines := sumTimelines(currentCol-1, lines[rowIdx+1:])
-			rightTimelines := sumTimelines(currentCol+1, lines[rowIdx+1:])
+			// check memoization cache
+			if cachedValue, exists := getMemoizedValue(currentCol, currentRowIdx+rowIdx); exists {
+				fmt.Printf("Using cached value for col=%d, row=%d: %d\n", currentCol, currentRowIdx+rowIdx, cachedValue)
+				return cachedValue
+			}
+			leftTimelines := sumTimelines(currentCol-1, lines[rowIdx+1:], currentRowIdx+rowIdx+1)
+			rightTimelines := sumTimelines(currentCol+1, lines[rowIdx+1:], currentRowIdx+rowIdx+1)
+			setMemoizedValue(currentCol, currentRowIdx+rowIdx, leftTimelines+rightTimelines)
 			return leftTimelines + rightTimelines
 		}
 	}
+
+	setMemoizedValue(currentCol, splitterIdx+currentRowIdx, 1)
 	// no splitter found in this column, beam reaches bottom
 	return 1
 }
 func doPartTwo(initialCol int, lines []string) {
-	totalTimelines := sumTimelines(initialCol, lines)
+	totalTimelines := sumTimelines(initialCol, lines, 1)
 	fmt.Printf("Total timelines reaching bottom: %d\n", totalTimelines)
 }
+
+var memoizationCache = make(map[string]int)
 
 func main() {
 	file, err := os.Open("diagram")
@@ -93,12 +117,3 @@ func main() {
 	doPartTwo(initialCol, lines[1:]) // pass lines excluding the first line with 'S'
 
 }
-
-// part one:
-// compute total number of times the beam splits in the laboratory diagram
-
-// part two:
-// use recursion to take a beam until it reaches the next splitter or bottom
-// when the beam reaches a splitter, recursively take the two outgoing beams
-// when a beam reaches the bottom, return 1
-// sum up all the returns from the bottom to get total splits
