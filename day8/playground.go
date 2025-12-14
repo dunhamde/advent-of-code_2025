@@ -37,9 +37,9 @@ func initDistances() {
 		}
 	}
 	sortedDists = slices.Sorted(maps.Keys(distMap))
-	for i, dist := range sortedDists {
-		fmt.Printf("Distance %d: %f, Pair: %s\n", i+1, dist, distMap[dist])
-	}
+	// for i, dist := range sortedDists {
+	// 	fmt.Printf("Distance %d: %f, Pair: %s\n", i+1, dist, distMap[dist])
+	// }
 }
 
 func addJunctionToCircuit(junction string, circuitIdx int) {
@@ -63,6 +63,15 @@ func checkJunctionsConnected(j1 string, j2 string) bool {
 		}
 	}
 	return false
+}
+
+func countTotalJunctionsInCircuits() int {
+	totalJunctions := 0
+	for _, circuit := range circuitsArray {
+		junctions := strings.Split(circuit, "-")
+		totalJunctions += len(junctions)
+	}
+	return totalJunctions
 }
 
 func setupCircuits() {
@@ -125,7 +134,9 @@ func setupCircuits() {
 		}
 
 		fmt.Println("----------------------")
-		if connectionCount >= 1000 {
+		if countTotalJunctionsInCircuits() == 1000 {
+			fmt.Println("All junctions connected!")
+			fmt.Println("lastpair:", jPair)
 			break
 		}
 
@@ -152,8 +163,9 @@ func main() {
 	for scanner.Scan() {
 		line := scanner.Text()
 		jPositions = append(jPositions, line)
-		// fmt.Println(line)
+
 	}
+	fmt.Println("number of junctions:", len(jPositions))
 	initDistances()
 	setupCircuits()
 
