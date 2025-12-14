@@ -170,13 +170,3 @@ func main() {
 	setupCircuits()
 
 }
-
-// part 1:
-// create an array of array of strings that represent the circuits
-// keep this array sorted by the length of string arrays (shortest first)
-
-// create circuits by going through the list of junction positions and comparing
-// the distance between junctions
-
-// after finding the 10 shortest connections, output the circuits
-// mulitple the lengths of the three largest circuits and output the result
